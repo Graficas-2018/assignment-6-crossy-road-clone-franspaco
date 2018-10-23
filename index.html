@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="stylesheet" href="css/main.css">
+
+    <script src="../libs/jquery-3.3.1/jquery-3.3.1.js"></script>
+    <script src="../libs/three.js/three.js"></script>
+    <script src="../libs/tween.js/tween.js"></script>
+    <script src="../libs/three.js/loaders/inflate.min.js"></script>
+
+    <script src="libs/keyframe.js"></script>
+    <script src="libs/FBXLoader.js"></script>
+    <script src="libs/cloneFBX.js"></script>
+    <script src="libs/OrbitControls.js"></script>
+    <script src="libs/OBJLoader.js"></script>
+
+    <script src="js/main.js"></script>
+    <script src="js/tiles.js"></script>
+
+    <title>Woop Woop</title>
+</head>
+
+<body>
+    <h3 id="score-field" class="field noselect">Score: 0</h3>
+    <h3 id="highscore-field" class="field noselect">Highscore: 0</h3>
+    <!-- <h3 id="time-field" class="field noselect">Time left: <span id="time-indicator">60</span></h3> -->
+    <div id="menu" class="hidden">
+        <div id="reset-button">
+            <p class="noselect">Reiniciar</p>
+        </div>
+    </div>
+    <div id="container">
+        <canvas id="webglcanvas" width="1900" height="1000"></canvas>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(startUp);
+    </script>
+    </body >
+</html >

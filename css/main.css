@@ -1,0 +1,78 @@
+
+
+html {
+    background-color: black;
+}
+
+body {
+    margin: 0;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+#container {
+    height: 99vh;
+}
+
+.field {
+    position: absolute;
+    color: white;
+    font-size: 2em;
+}
+
+#score-field {
+    top: 20px;
+    left: 20px;
+}
+
+#highscore-field {
+    top: 50px;
+    left: 20px;
+}
+
+#time-field {
+    top: 20px;
+    right: 70px;
+}
+
+#menu {
+    position: absolute; 
+    left: 0; 
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto; 
+    width: 150px;
+    height: 200px;
+    background-color: azure;
+}
+
+#reset-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    font-size: 2em;
+    width: 100%;
+    height: 100%;
+    background-color: orangered;
+}
+
+#reset-button:hover {
+    cursor: pointer;
+    background-color: rgb(161, 44, 2);
+}
+
+.hidden {
+    display: none;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome and Opera */
+  }
