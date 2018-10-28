@@ -372,6 +372,7 @@ async function createObjects(){
 
 function checkCarCollisions(){
     if(carCollision()){
+        console.log("ADAS");
         stop_game();
     }
 }
