@@ -17,6 +17,10 @@ var playing = false;
 var menu = null;
 
 var player = null;
+var surface = null;
+var light = null;
+
+var last_generated = 0;
 
 var keypress = {
     w: false,
@@ -73,12 +77,13 @@ function deg2rad(val) {
  * Starts the game
  */
 function reset_start(){
+    player.position.set(0,1,0);
     playing = true;
     score = 0;
     menu.addClass("hidden");
     updateScore();
     run();
-    player.position.set(0,1,0);
+    console.log('lol');
 }
 
 /**
@@ -179,9 +184,20 @@ function run() {
     if(playing){
         // Animate
         KF.update();
+        // Move camera
         camera.position.z = player.position.z + 10;
+
+        // Move light
+        light.position.z = player.position.z + 20;
+
+        // Move surface and make it appear it didnt
+        surface.position.z = player.position.z;
+        surface.material.map.offset.y = -0.2*player.position.z;
+
         setScore(-Math.floor(player.position.z));
-        // checkCarCollisions();
+        checkCarCollisions();
+        checkRiver();
+        makeMoreGame();
     }
 }
 
@@ -207,6 +223,10 @@ async function createMaterials() {
     materials['slot'] = new THREE.MeshLambertMaterial({color: 0x101010});
     materials['pavement'] = new THREE.MeshLambertMaterial({color: 0x101010});
     materials['car'] = new THREE.MeshLambertMaterial({color: 0xF44336});
+    materials['river'] = new THREE.MeshLambertMaterial({color: 0x0022ee});
+    materials['invisible'] = new THREE.MeshLambertMaterial({color: 0xffffff});
+    materials['invisible'].visible = false;
+    materials['log'] = new THREE.MeshLambertMaterial({color: 0xeeee11});
 }
 
 /**
@@ -240,7 +260,7 @@ function createScene(canvas) {
     // controls.update();
     scene.add(camera);
 
-    var light = new THREE.PointLight(0xffffff, 2);
+    light = new THREE.PointLight(0xffffff, 2);
     light.position.set(0, 20, 20);
     light.shadowCameraVisible = true;
     light.shadowDarkness = 1;
@@ -262,7 +282,7 @@ async function createObjects(){
 
     // Background plane
     var plane = new THREE.PlaneGeometry(100, 100);
-    var surface = new THREE.Mesh(plane, materials['surface']);
+    surface = new THREE.Mesh(plane, materials['surface']);
     surface.rotation.x = -Math.PI/2;
     surface.receiveShadow = true;
     scene.add(surface);
@@ -286,10 +306,11 @@ async function createObjects(){
 
     player.anims.w.init({
         interps: [{ 
-            keys:[0, 1], 
+            keys:[0, 0.5, 1], 
             values:[
-                { x : 0, z: 0 },
-                { x : 0, z: -1 },
+                { x :  0, z:  0,   y: 0 },
+                { x :  0, z: -0.5, y: 0.5 },
+                { x :  0, z: -1,   y: 0 },
             ],
             target:player.position,
             relative: true
@@ -299,10 +320,11 @@ async function createObjects(){
     });
     player.anims.a.init({
         interps: [{ 
-            keys:[0, 1], 
+            keys:[0, 0.5, 1], 
             values:[
-                { x : 0, z: 0 },
-                { x : -1, z: 0 },
+                { x :  0,   z: 0, y: 0 },
+                { x : -0.5, z: 0, y: 0.3 },
+                { x : -1,   z: 0, y: 0 },
             ],
             target:player.position,
             relative: true
@@ -312,10 +334,11 @@ async function createObjects(){
     });
     player.anims.s.init({
         interps: [{ 
-            keys:[0, 1], 
+            keys:[0, 0.5, 1], 
             values:[
-                { x : 0, z: 0 },
-                { x : 0, z: 1 },
+                { x :  0, z: 0,   y: 0 },
+                { x :  0, z: 0.5, y: 0.3 },
+                { x :  0, z: 1,   y: 0 },
             ],
             target:player.position,
             relative: true
@@ -325,10 +348,11 @@ async function createObjects(){
     });
     player.anims.d.init({
         interps: [{ 
-            keys:[0, 1], 
+            keys:[0, 0.5, 1], 
             values:[
-                { x : 0, z: 0 },
-                { x : 1, z: 0 },
+                { x : 0,   z: 0, y: 0 },
+                { x : 0.5, z: 0, y: 0.3 },
+                { x : 1,   z: 0, y: 0 },
             ],
             target:player.position,
             relative: true
@@ -351,6 +375,7 @@ async function createObjects(){
     var obj = await loader.asyncLoad('models/Oak_Tree.fbx');
     obj.traverse( child => {
         if(child.isMesh){
+            child.castShadow = true;
             child.scale.multiplyScalar(0.007);
             child.material[0].color.setHex("0x2e7d32");
             child.material[1].color.setHex("0x4CAF50");
@@ -359,9 +384,11 @@ async function createObjects(){
         }
     });
 
-    for (let index = 0; index < 10; index+=2) {
-        objects.tiles.push(makeObstacles(-2*index));
-        objects.tiles.push(makeRoad(-2*index - 2));
+    for (let index = 1; index <= 2; index+=3) {
+        objects.tiles.push(makeObstacles(-TILE_SPACING*index));
+        objects.tiles.push(makeRoad(-TILE_SPACING*index - TILE_SPACING));
+        objects.tiles.push(makeRiver(-TILE_SPACING*index - 2*TILE_SPACING))
+        last_generated = -TILE_SPACING*index - 2*TILE_SPACING;
     }
     
 }
@@ -370,6 +397,49 @@ async function createObjects(){
  * Events
  */
 
+function makeMoreGame(){
+    while(last_generated + 10 > player.position.z){
+        objects.tiles.push(makeObstacles(-TILE_SPACING + last_generated));
+        objects.tiles.push(makeRoad(-TILE_SPACING*2 + last_generated));
+        objects.tiles.push(makeRiver(-TILE_SPACING*3 + last_generated))
+        last_generated = -TILE_SPACING*3 + last_generated;
+    }
+}
+
+function checkRiver(){
+    if(riverDeath()){
+        stop_game();
+    }
+}
+
+function riverDeath(){
+    for (element of objects.tiles) {
+        if(element.type === tileEnum.river){
+            if(element.box.containsPoint(player.position)){
+                if(!onLog()){
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function onLog(){
+    for (element of objects.tiles) {
+        if(element.type === tileEnum.river){
+            for (log of element.content) {
+                var logbox = new THREE.Box3().setFromObject(log.box);
+                if(logbox.containsPoint(player.position)){
+                    player.position.x = log.position.x;
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 function checkCarCollisions(){
     if(carCollision()){
         stop_game();
@@ -377,14 +447,31 @@ function checkCarCollisions(){
 }
 
 function carCollision(){
-    for (let index = 0; index < objects.cars.length; index++) {
-        var playerbox = new THREE.Box3().setFromObject(player);
-        var carbox = new THREE.Box3().setFromObject(objects.cars[index]);
-        if(playerbox.intersectsBox(carbox)){
-            return true;
+    for (element of objects.tiles) {
+        if(element.type === tileEnum.road){
+            for (car of element.content) {
+                var playerbox = new THREE.Box3().setFromObject(player);
+                var carbox = new THREE.Box3().setFromObject(car);
+                if(playerbox.intersectsBox(carbox)){
+                    return true;
+                }
+            }
         }
     }
     return false;
+}
+
+function canMove(point){
+    for (element of objects.tiles) {
+        if(element.type === tileEnum.obstacle){
+            for (tree of element.content) {
+                if(tree.box.containsPoint(point)){
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
 }
 
 function onKeyReleased(event){
@@ -404,18 +491,20 @@ function onKeyPressed(event){
         if(key in player.anims && !player.moving()){
             var point = player.position.clone();
             point.add(game_values.dirs[key]);
-            var blocked = false;
-            for (let index = 0; index < objects.obstacles.length; index++) {
-                if(objects.obstacles[index].box.containsPoint(point)){
-                    return;
-                }
+            if (!canMove(point)){
+                return;
             }
+            // for (let index = 0; index < objects.obstacles.length; index++) {
+            //     if(objects.obstacles[index].box.containsPoint(point)){
+            //         return;
+            //     }
+            // }
             if(key == 'a' && player.position.x <= -game_values.side_limits)
                 return
             if(key == 'd' && player.position.x >= game_values.side_limits)
                 return
-            if(key == 's')
-                return
+            // if(key == 's')
+            //     return
             player.anims[key].start();
         }
     }
