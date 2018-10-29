@@ -454,6 +454,7 @@ function onLog(){
 
 function checkCarCollisions(){
     if(carCollision()){
+        console.log("ADAS");
         stop_game();
     }
 }
