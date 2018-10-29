@@ -105,8 +105,8 @@ function makeRiver(Z){
     tile.type = tileEnum.river;
     tile.Z = Z;
     scene.add(tile);
-    var boxMin = new THREE.Vector3(-game_values.side_limits, 0, Z-1);
-    var boxMax = new THREE.Vector3( game_values.side_limits, 5, Z+1);
+    var boxMin = new THREE.Vector3(-3*game_values.side_limits, 0, Z-1);
+    var boxMax = new THREE.Vector3( 3*game_values.side_limits, 5, Z+1);
     tile.box = new THREE.Box3(boxMin, boxMax);
     var river = new THREE.Mesh(road_geo, materials['river']);
     river.position.set(0, 0.01, Z);

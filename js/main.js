@@ -194,9 +194,15 @@ function run() {
         surface.position.z = player.position.z;
         surface.material.map.offset.y = -0.2*player.position.z;
 
+        // Update score
         setScore(-Math.floor(player.position.z));
+
+        // Check death conditions
         checkCarCollisions();
         checkRiver();
+        checkOutOfBounds();
+
+        // Make more game?
         makeMoreGame();
     }
 }
@@ -403,6 +409,12 @@ function makeMoreGame(){
         objects.tiles.push(makeRoad(-TILE_SPACING*2 + last_generated));
         objects.tiles.push(makeRiver(-TILE_SPACING*3 + last_generated))
         last_generated = -TILE_SPACING*3 + last_generated;
+    }
+}
+
+function checkOutOfBounds(){
+    if(Math.abs(player.position.x) > game_values.side_limits + 1 ){
+        stop_game();
     }
 }
 
